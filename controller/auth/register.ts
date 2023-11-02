@@ -1,21 +1,49 @@
-import {prisma}
+import { PrismaClient } from "@prisma/client";
+import { randomUUID } from "crypto";
+import bcrypt from 'bcrypt';
+import { Request, Response } from 'express';
 
-export default function Register (req, res){
+export default async function Register(req: Request, res: Response) {
+    const prisma = new PrismaClient()
 
-    try{
-        let body = []
-        if (req.statusCode<400 && req.body.name && req.body.email&&
-            req.body.title && req.body.phone_number && req.body.desription)
-        {
-            body = req.body
-        }else{
-            console.log("you're not fill all the ")
+    try {
+        if (req.statusCode!= undefined && req.statusCode>=400){
+            res.status(400).send({ status: "Request failed" })
+            return
+        }
+        if (req.body == null) {
+            return res.status(400).send({ status: "Request body is empty" })
+        }
+        if (!(req.body.full_name && req.body.email &&
+            req.body.title && req.body.phone_number &&
+            req.body.description)) {
+            console.log("You haven't filled in all the required fields.")
+            return res.status(400).send({ status: "Missing required fields" })
         }
 
+        const isEmailExists = await prisma.user.findFirst({where:{email: req.body.email}})
+        if (isEmailExists) return res.status(400).send({ status: "Email already exists" })
 
-    }catch (e){
-        console.log(e)
-        res.sendStatus(400)
-        return
+        const isPhoneNumberExists = await prisma.user.findFirst({where:{phone_number:req.body.phone_number}})
+        if (isPhoneNumberExists) return res.status(400).send({ status: "Phone number already exists" })
+
+        await prisma.user.create({
+            data: {
+                uuid: randomUUID(),
+                name: req.body.full_name,
+                email: req.body.email,
+                title: req.body.title,
+                password: await bcrypt.hash(req.body.password, 10),
+                phone_number: req.body.phone_number,
+                description: req.body.description,
+                id_file: 1
+            }
+        })
+    } catch (e) {
+        console.error(e)
+        return res.status(500).send({ status: "Internal server error" })
+    } finally {
+        await prisma.$disconnect()
     }
+    return res.status(200).send({ status: "ok" })
 }

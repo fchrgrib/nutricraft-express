@@ -6,6 +6,9 @@ COPY package*.json .
 COPY tsconfig.json ./tsconfig.json
 
 RUN npm install
+RUN npm uninstall bcrypt
+RUN npm install @types/bcrypt
+RUN npm install @types/cookie-parser
 RUN npm install prisma typescript ts-node @types/node --save-dev
 
 COPY . .

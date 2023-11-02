@@ -1,30 +1,26 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express} from 'express';
 import dotenv from 'dotenv';
-import crypto from "crypto";
+import cookieParser from 'cookie-parser';
+import Auth from "./router/auth/auth.router";
+import Middleware from "./handler/middleware/middleware";
 
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 8080;
+app.use(express.json())
+app.use(cookieParser())
+dotenv.config()
 
 app.use((req,res,next)=>{
     console.log(`🤖 Nutricraft Logging 🤖  ${req.ip} : \x1b[1m${req.method}\x1b[0m ${req.originalUrl} || :${res.statusCode}:`)
     next();
 })
-
-app.get('/', (req: Request, res: Response) => {
-    const header = {alg:"HS256", typ:"JWT"}
-    const payload = {id:1, email:"kontol@gmail.com"}
-
-    const encodeHeader = Buffer.from(JSON.stringify(header)).toString("base64")
-    const encodePayload = Buffer.from(JSON.stringify(payload)).toString("base64")
-
-    const signature = crypto
-        .createHmac("sha256","kontol-kuda")
-        .update(encodeHeader+"."+encodePayload)
-        .digest("base64")
-    res.send(`${encodeHeader} : ${encodePayload} : ${signature}`);
-});
+Auth(app)
+app.use('/home', Middleware)
+app.get('/home', (req, res)=>{
+    res.status(200).send({status: `welcome ${req.cookies['token']}`})
+})
 
 app.listen(port, () => {
     console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
