@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,6 +17,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const auth_router_1 = __importDefault(require("./router/auth/auth.router"));
 const middleware_1 = __importDefault(require("./handler/middleware/middleware"));
+const redis_conf_1 = require("./conf/redis.conf");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8080;
@@ -18,11 +28,35 @@ app.use((req, res, next) => {
     console.log(`🤖 Nutricraft Logging 🤖  ${req.ip} : \x1b[1m${req.method}\x1b[0m ${req.originalUrl} || :${res.statusCode}:`);
     next();
 });
+app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const redis = (0, redis_conf_1.RedisConf)();
+    yield redis.connect();
+    yield redis.set('token', 'aoifjoagoisdjgsdogisgosidgjisg');
+    yield redis.expire('token', 10);
+    res.send({ status: 'ok' });
+}));
+app.get('/nyobaredis', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const redis = (0, redis_conf_1.RedisConf)();
+    yield redis.connect();
+    try {
+        const cek = yield redis.get('token');
+        if (cek) {
+            return res.send({ status: cek });
+        }
+        return res.send({ status: 'token doesnt exist' });
+    }
+    catch (e) {
+        return res.send({ status: 'token doesnt exist' });
+    }
+}));
 (0, auth_router_1.default)(app);
 app.use('/home', middleware_1.default);
-app.get('/home', (req, res) => {
-    res.status(200).send({ status: `welcome ${req.cookies['token']}` });
-});
+app.get('/home', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const redis = (0, redis_conf_1.RedisConf)();
+    yield redis.connect();
+    const token = yield redis.get('token');
+    res.status(200).send({ status: `welcome ${token}` });
+}));
 app.listen(port, () => {
     console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });

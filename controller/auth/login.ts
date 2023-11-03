@@ -2,9 +2,12 @@ import { Request, Response } from 'express';
 import {PrismaClient} from "@prisma/client";
 import comparePasswords from "../../utils/auth.utils";
 import jwt from "jsonwebtoken";
+import {RedisConf} from "../../conf/redis.conf";
 
 export default async function Login (req:Request,res:Response){
     const prisma = new PrismaClient()
+    const redis = RedisConf()
+
     if (req.body == null){
         res.status(400).send({status:"your not fill anything"})
         return
@@ -29,7 +32,10 @@ export default async function Login (req:Request,res:Response){
         }
 
         const encode = jwt.sign({uuid: isEmailExist.uuid, email: isEmailExist.email, name: isEmailExist.name},process.env.JWT_KEY || '')
-        res.cookie('token',encode,{maxAge: 24*60*60*1000, secure: true})
+        await redis.connect()
+        await redis.set('token',encode)
+        await redis.expire('token',24*60*60)
+        await redis.disconnect()
         res.status(200).send({status:"ok"})
     }catch (e) {
         console.error(e)
