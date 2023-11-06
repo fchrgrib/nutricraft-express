@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import {PrismaClient} from "@prisma/client";
 import comparePasswords from "../../utils/auth.utils";
 import jwt from "jsonwebtoken";
-import {RedisConf} from "../../conf/redis.conf";
+import {RedisConf} from "../../handler/conf/redis.conf";
 
 export default async function Login (req:Request,res:Response){
     const prisma = new PrismaClient()
@@ -31,11 +31,13 @@ export default async function Login (req:Request,res:Response){
             return
         }
 
-        const encode = jwt.sign({uuid: isEmailExist.uuid, email: isEmailExist.email, name: isEmailExist.name},process.env.JWT_KEY || '')
+        const encode = jwt.sign({uuid: isEmailExist.uuid, email: isEmailExist.email, name: isEmailExist.name},`${process.env.JWT_KEY}${process.env.REFRESH_KEY}` || '')
+        const encodeRefresh = jwt.sign({uuid: isEmailExist.uuid}, `${process.env.REFRESH_KEY}${process.env.JWT_KEY}`||'')
+        res.cookie('token',encode,{maxAge:24*60*60})
+
         await redis.connect()
-        await redis.set('token',encode)
-        await redis.expire('token',24*60*60)
-        await redis.disconnect()
+        await redis.set(`refresh-token-${isEmailExist.uuid}`, encodeRefresh)
+        await redis.expire(`refresh-token-${isEmailExist.uuid}`, 12*30*24*60*60)
         res.status(200).send({status:"ok"})
     }catch (e) {
         console.error(e)
@@ -43,6 +45,7 @@ export default async function Login (req:Request,res:Response){
         return
     }finally {
         prisma.$disconnect()
+        await redis.disconnect()
     }
 
     return

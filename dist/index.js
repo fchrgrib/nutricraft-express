@@ -18,6 +18,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const auth_router_1 = __importDefault(require("./router/auth/auth.router"));
 const middleware_1 = __importDefault(require("./handler/middleware/middleware"));
 const redis_conf_1 = require("./conf/redis.conf");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8080;
@@ -52,10 +53,24 @@ app.get('/nyobaredis', (req, res) => __awaiter(void 0, void 0, void 0, function*
 (0, auth_router_1.default)(app);
 app.use('/home', middleware_1.default);
 app.get('/home', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = req.cookies['token'];
+    if (token === '')
+        return res.status(401).send({ status: 'token doesnt exist' });
+    const decode = jsonwebtoken_1.default.verify(token, `${process.env.JWT_KEY}${process.env.REFRESH_KEY}` || '');
+    if (!(typeof decode === 'object' && 'uuid' in decode && typeof decode.uuid === 'string'))
+        return res.status(401).send({ status: 'token is invalid' });
     const redis = (0, redis_conf_1.RedisConf)();
     yield redis.connect();
-    const token = yield redis.get('token');
-    res.status(200).send({ status: `welcome ${token}` });
+    try {
+        const decodeRefresh = yield redis.get(`refresh-token-${decode.uuid}`);
+        res.status(200).send({ status: `welcome access token: ${token}\nrefresh token:${decodeRefresh}` });
+    }
+    catch (e) {
+        return res.status(401).send({ status: 'refreshToken is invalid' });
+    }
+    finally {
+        redis.disconnect();
+    }
 }));
 app.listen(port, () => {
     console.log(`⚡️[server]: Server is running at http://localhost:${port}`);

@@ -11,26 +11,78 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  uuid         String   @unique @db.VarChar(255)
-  name         String   @db.VarChar(255)
-  email        String   @unique @db.VarChar(255)
-  password     String   @db.VarChar(255)
-  title        String   @db.VarChar(255)
-  phone_number String   @unique @db.VarChar(20)
-  description  String   @db.VarChar(1000)
+  id           Int       @id @default(autoincrement())
+  uuid         String    @unique @db.VarChar(255)
+  name         String    @db.VarChar(255)
+  email        String    @unique @db.VarChar(255)
+  password     String    @db.VarChar(255)
+  title        String    @db.VarChar(255)
+  phone_number String    @unique @db.VarChar(20)
+  description  String    @db.VarChar(1000)
   id_file      Int
-  created_at   DateTime @default(now())
-  updated_at   DateTime @default(now())
-  file         File     @relation(fields: [id_file], references: [id])
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @default(now())
+  file         File      @relation(fields: [id_file], references: [id])
+  content      Content[]
+  like         Like[]
+  comment      Comment[]
+}
+
+model Content {
+  id         Int       @id @default(autoincrement())
+  title      String    @db.VarChar(1000)
+  highlight  String    @db.VarChar(1200)
+  body       String    @db.VarChar(10000)
+  id_creator Int
+  id_photo   Int
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  viewers    Viewers[]
+  user       User      @relation(fields: [id_creator], references: [id], onDelete: NoAction)
+  file       File      @relation(fields: [id_photo], references: [id])
+}
+
+model Viewers {
+  id         Int     @id @default(autoincrement())
+  id_content Int
+  ip_address String  @db.VarChar(225)
+  content    Content @relation(fields: [id_content], references: [id])
+}
+
+model Forum {
+  id      Int       @id @default(autoincrement())
+  title   String    @db.VarChar(1000)
+  body    String    @db.VarChar(10000)
+  id_file Int
+  like    Like[]
+  comment Comment[]
+  file    File      @relation(fields: [id_file], references: [id])
+}
+
+model Like {
+  id      Int   @id
+  id_user Int
+  forum   Forum @relation(fields: [id], references: [id], onDelete: Cascade)
+  user    User  @relation(fields: [id_user], references: [id])
+}
+
+model Comment {
+  id         Int      @id
+  id_user    Int
+  comment    String   @db.VarChar(10000)
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [id_user], references: [id], onDelete: Cascade)
+  forum      Forum    @relation(fields: [id], references: [id])
 }
 
 model File {
-  id         Int      @id @default(autoincrement())
-  name       String   @db.VarChar(500)
-  type       String   @db.VarChar(25)
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(500)
+  type       String    @db.VarChar(25)
   size       Int
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
   user       User[]
+  forum      Forum[]
+  Content    Content[]
 }

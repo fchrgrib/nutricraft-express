@@ -4,7 +4,9 @@ import cookieParser from 'cookie-parser';
 import Auth from "./router/auth/auth.router";
 import Middleware from "./handler/middleware/middleware";
 import {PrismaClient} from "@prisma/client";
-import {RedisConf} from "./conf/redis.conf";
+import {RedisConf} from "./handler/conf/redis.conf";
+import jwt from "jsonwebtoken";
+import MainRouter from "./router/router";
 
 dotenv.config();
 
@@ -19,34 +21,28 @@ app.use((req,res,next)=>{
     next();
 })
 
-app.get('/',async (req,res)=>{
-    const redis = RedisConf()
-    await redis.connect()
-    await redis.set('token','aoifjoagoisdjgsdogisgosidgjisg')
-    await redis.expire('token',10)
-    res.send({status:'ok'})
-})
-app.get('/nyobaredis',async (req, res)=>{
+
+MainRouter(app)
+
+
+app.use('/home', Middleware)
+app.get('/home', async (req, res)=>{
+    const token = req.cookies['token']
+    if (token==='') return res.status(401).send({status:'token doesnt exist'})
+
+    const decode = jwt.verify(token,`${process.env.JWT_KEY}${process.env.REFRESH_KEY}`||'')
+    if (!(typeof decode === 'object' && 'uuid' in decode && typeof decode.uuid === 'string'))
+        return res.status(401).send({status:'token is invalid'})
     const redis = RedisConf()
     await redis.connect()
     try{
-        const cek = await redis.get('token')
-        if (cek) {
-            return res.send({status: cek})
-        }
-        return res.send({status:'token doesnt exist'})
+        const decodeRefresh = await redis.get(`refresh-token-${decode.uuid}`)
+        res.status(200).send({status: `welcome access token: ${token}\nrefresh token:${decodeRefresh}`})
     }catch (e) {
-        return res.send({status:'token doesnt exist'})
+        return res.status(401).send({status:'refreshToken is invalid'})
+    }finally {
+        redis.disconnect()
     }
-
-})
-Auth(app)
-app.use('/home', Middleware)
-app.get('/home', async (req, res)=>{
-    const redis = RedisConf()
-    await redis.connect()
-    const token = await redis.get('token')
-    res.status(200).send({status: `welcome ${token}`})
 })
 
 app.listen(port, () => {
