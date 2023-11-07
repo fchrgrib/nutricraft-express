@@ -1,12 +1,10 @@
-import express, { Express} from 'express';
-import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser';
-import Auth from "./router/auth/auth.router";
-import Middleware from "./handler/middleware/middleware";
-import {PrismaClient} from "@prisma/client";
-import {RedisConf} from "./handler/conf/redis.conf";
-import jwt from "jsonwebtoken";
-import MainRouter from "./router/router";
+import express, { Express} from 'express'
+import dotenv from 'dotenv'
+import cookieParser from 'cookie-parser'
+import Middleware from "./handler/middleware/middleware"
+import {RedisConf} from "./handler/conf/redis.conf"
+import jwt from "jsonwebtoken"
+import MainRouter from "./router/router"
 
 dotenv.config();
 

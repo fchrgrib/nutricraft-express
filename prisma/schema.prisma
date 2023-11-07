@@ -50,13 +50,15 @@ model Viewers {
 }
 
 model Forum {
-  id      Int       @id @default(autoincrement())
-  title   String    @db.VarChar(1000)
-  body    String    @db.VarChar(10000)
-  id_file Int
-  like    Like[]
-  comment Comment[]
-  file    File      @relation(fields: [id_file], references: [id])
+  id         Int       @id @default(autoincrement())
+  title      String    @db.VarChar(1000)
+  body       String    @db.VarChar(10000)
+  id_file    Int
+  like       Like[]
+  comment    Comment[]
+  file       File      @relation(fields: [id_file], references: [id])
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
 }
 
 model Like {
