@@ -15,10 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const auth_router_1 = __importDefault(require("./router/auth/auth.router"));
 const middleware_1 = __importDefault(require("./handler/middleware/middleware"));
-const redis_conf_1 = require("./conf/redis.conf");
+const redis_conf_1 = require("./handler/conf/redis.conf");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const router_1 = __importDefault(require("./router/router"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8080;
@@ -29,28 +29,7 @@ app.use((req, res, next) => {
     console.log(`🤖 Nutricraft Logging 🤖  ${req.ip} : \x1b[1m${req.method}\x1b[0m ${req.originalUrl} || :${res.statusCode}:`);
     next();
 });
-app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const redis = (0, redis_conf_1.RedisConf)();
-    yield redis.connect();
-    yield redis.set('token', 'aoifjoagoisdjgsdogisgosidgjisg');
-    yield redis.expire('token', 10);
-    res.send({ status: 'ok' });
-}));
-app.get('/nyobaredis', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const redis = (0, redis_conf_1.RedisConf)();
-    yield redis.connect();
-    try {
-        const cek = yield redis.get('token');
-        if (cek) {
-            return res.send({ status: cek });
-        }
-        return res.send({ status: 'token doesnt exist' });
-    }
-    catch (e) {
-        return res.send({ status: 'token doesnt exist' });
-    }
-}));
-(0, auth_router_1.default)(app);
+(0, router_1.default)(app);
 app.use('/home', middleware_1.default);
 app.get('/home', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const token = req.cookies['token'];
