@@ -2,6 +2,7 @@ import express, { Express} from 'express'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
 import MainRouter from "./router/router"
+import {AddExp, GetExp, NewLevelAccount, SubtractExp} from "./soap/service/level.soap.service";
 
 dotenv.config();
 
@@ -20,7 +21,6 @@ app.use((req,res,next)=>{
 
 
 MainRouter(app)
-// app.post('/',SubtractCoin)
 
 app.listen(port, () => {
     console.log(`⚡️[server]: Server is running at http://localhost:${port}`);

@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 import {newCoinAccount} from "../../soap/template/coin.soap.template";
 import {NewCoinAccount} from "../../soap/service/coin.soap.service";
+import {NewLevelAccount} from "../../soap/service/level.soap.service";
 
 export default async function Register(req: Request, res: Response) {
     const prisma = new PrismaClient()
@@ -33,9 +34,12 @@ export default async function Register(req: Request, res: Response) {
 
         const uuid = randomUUID()
         const isCoinCreated = await NewCoinAccount(uuid)
+        const isLevelCreated = await NewLevelAccount(uuid)
 
         if (!isCoinCreated)
             return res.status(400).send({ status: "Coin cannot created" })
+        if (!isLevelCreated)
+            return res.status(400).send({ status: "Level cannot created" })
 
         await prisma.user.create({
             data: {

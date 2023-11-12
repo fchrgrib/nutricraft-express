@@ -9,7 +9,7 @@ const soap = require('easy-soap-request')
 export async function GetCoin(req:Request, res:Response){
     const uuid = await FindUuidByAccessToken(req,res)
     if (!uuid)
-        return res.status(401).send({coin:[], status:"Uuid doesn't exists"})
+        return res.status(401).send({coin:null, status:"Uuid doesn't exists"})
 
     let coin = ''
     const xmlRequest = util.format(getCoin.template, uuid)
