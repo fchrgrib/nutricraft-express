@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
 import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
+import {newCoinAccount} from "../../soap/template/coin.soap.template";
+import {NewCoinAccount} from "../../soap/service/coin.soap.service";
 
 export default async function Register(req: Request, res: Response) {
     const prisma = new PrismaClient()
@@ -22,14 +24,22 @@ export default async function Register(req: Request, res: Response) {
         }
 
         const isEmailExists = await prisma.user.findFirst({where:{email: req.body.email}})
-        if (isEmailExists) return res.status(400).send({ status: "Email already exists" })
+        if (isEmailExists)
+            return res.status(400).send({ status: "Email already exists" })
 
         const isPhoneNumberExists = await prisma.user.findFirst({where:{phone_number:req.body.phone_number}})
-        if (isPhoneNumberExists) return res.status(400).send({ status: "Phone number already exists" })
+        if (isPhoneNumberExists)
+            return res.status(400).send({ status: "Phone number already exists" })
+
+        const uuid = randomUUID()
+        const isCoinCreated = await NewCoinAccount(uuid)
+
+        if (!isCoinCreated)
+            return res.status(400).send({ status: "Coin cannot created" })
 
         await prisma.user.create({
             data: {
-                uuid: randomUUID(),
+                uuid: uuid,
                 name: req.body.full_name,
                 email: req.body.email,
                 title: req.body.title,

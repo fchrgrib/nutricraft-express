@@ -3,6 +3,7 @@ import AuthRouter from "./auth/auth.router";
 import ContentRouter from "./content/content.router";
 import ForumRouter from "./forum/forum.router";
 import LikeForumRouter from "./forum/like.forum.router";
+import SoapServiceRouter from "./soap/soap.service.router";
 
 export default function MainRouter(router: Express) {
     AuthRouter(router)
@@ -10,4 +11,5 @@ export default function MainRouter(router: Express) {
     ForumRouter(router)
     ContentRouter(router)
     LikeForumRouter(router)
+    SoapServiceRouter(router)
 }

@@ -1,6 +1,6 @@
 import {Request, Response} from "express"
 import {PrismaClient} from "@prisma/client";
-import FindIdByAccessToken from "../../utils/jwt.utils";
+import {FindIdByAccessToken} from "../../utils/jwt.utils";
 
 export async function CreateLike(req:Request, res:Response){
     const prisma = new PrismaClient()

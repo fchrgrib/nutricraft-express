@@ -2,7 +2,7 @@ import {Request, Response} from "express"
 import {PrismaClient} from "@prisma/client";
 import jwt from "jsonwebtoken";
 
-export default async function FindIdByAccessToken(req:Request, res:Response){
+export async function FindIdByAccessToken(req:Request, res:Response){
     const prisma = new PrismaClient()
     const token = req.cookies['token']
     if (token==='') return null
@@ -18,4 +18,15 @@ export default async function FindIdByAccessToken(req:Request, res:Response){
     }catch (e) {
         return null
     }
+}
+
+export async function FindUuidByAccessToken(req:Request, res:Response){
+    const token = req.cookies['token']
+    if (token==='') return null
+
+    const decode = jwt.verify(token,`${process.env.JWT_KEY}${process.env.REFRESH_KEY}`||'')
+    if (!(typeof decode === 'object' && 'uuid' in decode && typeof decode.uuid === 'string'))
+        return null
+
+    return decode.uuid
 }

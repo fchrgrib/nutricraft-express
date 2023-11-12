@@ -20,11 +20,7 @@ app.use((req,res,next)=>{
 
 
 MainRouter(app)
-
-
-app.post('/', (req,res)=>{
-    console.log(req.f)
-})
+// app.post('/',SubtractCoin)
 
 app.listen(port, () => {
     console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
