@@ -2,4 +2,3 @@
 .idea
 dist
 dist/index.js
-prisma/migrations
