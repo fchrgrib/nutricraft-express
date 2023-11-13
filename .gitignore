@@ -1,4 +1,4 @@
 /node_modules/
-.idea
-dist
-dist/index.js
+/prisma/migrations/
+/dist/
+/.idea/
