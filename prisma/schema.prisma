@@ -11,21 +11,22 @@ datasource db {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  uuid         String    @unique @db.VarChar(255)
-  name         String    @db.VarChar(255)
-  email        String    @unique @db.VarChar(255)
-  password     String    @db.VarChar(255)
-  title        String    @db.VarChar(255)
-  phone_number String    @unique @db.VarChar(20)
-  description  String    @db.VarChar(1000)
+  id           Int          @id @default(autoincrement())
+  uuid         String       @unique @db.VarChar(255)
+  name         String       @db.VarChar(255)
+  email        String       @unique @db.VarChar(255)
+  password     String       @db.VarChar(255)
+  title        String       @db.VarChar(255)
+  phone_number String       @unique @db.VarChar(20)
+  description  String       @db.VarChar(1000)
   id_file      Int
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @default(now())
-  file         File      @relation(fields: [id_file], references: [id])
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @default(now())
+  file         File         @relation(fields: [id_file], references: [id])
   content      Content[]
   like         Like[]
   comment      Comment[]
+  redeem       UserRedeem[]
 }
 
 model Content {
@@ -56,7 +57,6 @@ model Forum {
   id_file    Int
   like       Like[]
   comment    Comment[]
-  file       File      @relation(fields: [id_file], references: [id])
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
 }
@@ -85,6 +85,22 @@ model File {
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
   user       User[]
-  forum      Forum[]
-  Content    Content[]
+  content    Content[]
+}
+
+model Redeem {
+  id   Int          @id @default(autoincrement())
+  name String       @db.VarChar(255)
+  from String       @db.VarChar(255)
+  coin Int
+  user UserRedeem[]
+}
+
+model UserRedeem {
+  user_id   Int
+  redeem_id Int
+  user      User   @relation(fields: [user_id], references: [id])
+  redeem    Redeem @relation(fields: [redeem_id], references: [id])
+
+  @@id([redeem_id, user_id])
 }

@@ -1,7 +1,6 @@
 import {Request, Response} from "express"
 import {FindIdByAccessToken} from "../../utils/jwt.utils";
 import {PrismaClient} from "@prisma/client";
-import exp from "constants";
 
 export async function CreateComment(req:Request, res:Response){
     const prisma = new PrismaClient()

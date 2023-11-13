@@ -1,6 +1,9 @@
 import {Request, Response} from "express"
 import {PrismaClient} from "@prisma/client"
-import {FindIdByAccessToken} from "../../utils/jwt.utils"
+import {FindIdByAccessToken, FindUuidByAccessToken} from "../../utils/jwt.utils"
+import {FindCreatorByIdContent, FindIdByUuid} from "../../utils/user.utils";
+import {AddExp} from "../../soap/service/level.soap.service";
+import {AddCoin} from "../../soap/service/coin.soap.service";
 
 //TODO: Create Find Content By Creator Subscribed
 
@@ -39,6 +42,7 @@ export async function CreateContent(req: Request, res: Response){
 
 export async function DeleteContent(req:Request, res:Response){
     const prisma = new PrismaClient()
+
     if (req.body == null)
         return res.status(400).send({status:"Request body didnt exists"})
 
@@ -61,6 +65,7 @@ export async function DeleteContent(req:Request, res:Response){
 export async function UpdateContent(req:Request, res:Response) {
     const prisma = new PrismaClient()
     const id = +req.params['id']
+
     if (req.body == null)
         return res.status(400).send({status:"Request body didnt exists"})
     const {title, highlight, body, id_photo, id_creator} = req.body
@@ -93,6 +98,7 @@ export async function UpdateContent(req:Request, res:Response) {
 export async function FindAllContent(req:Request, res:Response) {
     const prisma = new PrismaClient()
     let data = []
+
     try{
         data = await prisma.content.findMany({
             select:{}
@@ -118,7 +124,28 @@ export async function FindContentById(req:Request, res:Response){
     const ip = req.ip
     let data = []
 
-    if (!ip) return
+    if (!ip)
+        return res.status(400).send({
+            data: null,
+            status: "ip address didnt exist"
+        })
+
+    const uuidCreator = await FindCreatorByIdContent(id)
+    if (uuidCreator == null)
+        return res.status(400).send({
+            data: null,
+            status: "creator didnt exist"
+        })
+
+
+    const addExp = await AddExp(uuidCreator, 10)
+    const addCoin = await AddCoin(uuidCreator, 100)
+
+    if (!addExp || !addCoin)
+        return res.status(400).send({
+            data: null,
+            status: "failed to add coin or exp"
+        })
 
     try {
         data = await prisma.content.findMany({
@@ -148,19 +175,21 @@ export async function FindContentById(req:Request, res:Response){
     })
 }
 
-export async function FindContentByCreator(req:Request, res:Response){
+export async function FindContentByUuid(req:Request, res:Response){
     const prisma = new PrismaClient()
-    const id = +req.params['id']
+    const uuid = req.params['uuid']
     let data = []
-    if (req.body == null)
-        return res.status(400).send({status:"Request body didnt exists"})
+
+    const id = await FindIdByUuid(uuid)
+    if (id == null)
+        return res.status(400).send({status:"Uuid didnt exists"})
 
     try {
         data = await prisma.content.findMany({
             where:{
                 id_creator: id
             },
-            select:{}
+            select:{},
         })
     }catch (e) {
         return res.status(500).send({
@@ -177,3 +206,85 @@ export async function FindContentByCreator(req:Request, res:Response){
     })
 }
 
+export async function FindContentByCreator(req: Request, res: Response){
+    const prisma = new PrismaClient()
+    const uuid = await FindUuidByAccessToken(req, res)
+
+    if (uuid == null)
+        return res.status(401).send({
+            data: null,
+            status: "token invalid"
+        })
+
+    const id = await FindIdByUuid(uuid)
+    let data: object = []
+    if (id == null)
+        return res.status(400).send({status:"Uuid didnt exists"})
+
+    try {
+        data = await prisma.content.findMany({
+            where:{
+                id_creator: id
+            },
+            select:{},
+        })
+    }catch (e) {
+        return res.status(500).send({
+            data:null,
+            status:"Internal server error"
+        })
+    }finally {
+        await prisma.$disconnect()
+    }
+
+    return res.status(500).send({
+        data:data,
+        status:"Internal server error"
+    })
+}
+
+
+export async function FindContentByTitle(req: Request, res: Response){
+    const prisma = new PrismaClient()
+
+    if (req.body == null)
+        return res.status(400).send({
+            data: null,
+            status: "Request body didn't exists"
+        })
+
+    const {title} = req.body
+    if (!title)
+        return res.status(400).send({
+            data: null,
+            status: "You hadn't fill the title"
+        })
+
+    let data: object = []
+    try{
+        const isContentExist = await prisma.content.findMany({
+            where:{
+                title: title
+            }
+        })
+        if (!isContentExist)
+            return res.status(400).send({
+                data: null,
+                status: "Title didn't exists"
+            })
+
+        data = isContentExist
+    }catch (e) {
+        return res.status(500).send({
+            data:null,
+            status:"Internal server error"
+        })
+    } finally {
+        await prisma.$disconnect()
+    }
+
+    return res.status(200).send({
+        data: data,
+        status: 'ok'
+    })
+}

@@ -1,16 +1,10 @@
-import {Request, Response} from 'express'
 import * as util from "util"
 import {parseString} from "xml2js";
 import {addCoin, getCoin, newCoinAccount, subtractCoin} from "../template/coin.soap.template";
-import {FindUuidByAccessToken} from "../../utils/jwt.utils";
 
 const soap = require('easy-soap-request')
 
-export async function GetCoin(req:Request, res:Response){
-    const uuid = await FindUuidByAccessToken(req,res)
-    if (!uuid)
-        return res.status(401).send({coin:null, status:"Uuid doesn't exists"})
-
+export async function GetCoin(uuid: string){
     let coin = ''
     const xmlRequest = util.format(getCoin.template, uuid)
 
@@ -26,25 +20,14 @@ export async function GetCoin(req:Request, res:Response){
             coin = result["S:Envelope"]["S:Body"][0]["ns2:getCoinsResponse"][0]["return"][0]
         })
 
-        return res.status(200).send({coin:coin, status:'ok'})
+        return coin
     }catch (e) {
-        return res.status(500).send({coin:null, status:"Can't connect soap service"})
+        return null
     }
 }
 
-export async function AddCoin(req:Request, res:Response){
-    const uuid = await FindUuidByAccessToken(req,res)
-    if (!uuid)
-        return res.status(401).send({status:"Uuid doesn't exists"})
-
-    if (req.body == null)
-        return res.status(400).send({status:"Uuid doesn't exists"})
-
-    const {coin} = req.body
-    if (!coin)
-        return res.status(400).send({status:"Coin doesn't exists"})
-
-    const xmlRequest = util.format(addCoin.template, uuid, parseInt(coin))
+export async function AddCoin(uuid: string, coin: number){
+    const xmlRequest = util.format(addCoin.template, uuid, coin)
 
     try{
         await soap({
@@ -53,22 +36,14 @@ export async function AddCoin(req:Request, res:Response){
             xml: xmlRequest
         })
 
-        return res.status(200).send({status:'ok'})
+        return true
     }catch (e) {
-        return res.status(500).send({status:"Can't connect soap service"})
+        return false
     }
 }
 
-export async function SubtractCoin(req:Request, res:Response){
-    const uuid = await FindUuidByAccessToken(req,res)
-    if (!uuid)
-        return res.status(401).send({status:"Uuid doesn't exists"})
-
-    if (req.body == null)
-        return res.status(401).send({status:"Uuid doesn't exists"})
-
-    const {coin} = req.body
-    const xmlRequest = util.format(subtractCoin.template, uuid, parseInt(coin))
+export async function SubtractCoin(uuid: string, coin: number){
+    const xmlRequest = util.format(subtractCoin.template, uuid, coin)
 
     try{
         await soap({
@@ -77,9 +52,9 @@ export async function SubtractCoin(req:Request, res:Response){
             xml: xmlRequest
         })
 
-        return res.status(200).send({status:'ok'})
+        return true
     }catch (e) {
-        return res.status(500).send({status:"Can't connect soap service"})
+        return false
     }
 }
 
