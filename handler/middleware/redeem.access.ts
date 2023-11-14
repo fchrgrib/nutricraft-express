@@ -4,11 +4,13 @@ export default async function RedeemAccess(req: Request, res: Response, next: Ne
     const apiKey = req.query['APIkey']
     const secretKey = process.env.REDEEM_KEY
 
+    console.log(`Api key=${apiKey}\nsecret key=${secretKey}`)
+
     if (!secretKey)
         return res.status(401).send({status:"Invalid key"})
 
-    if (secretKey === apiKey)
-        next()
+    if (!(secretKey === apiKey))
+        return res.status(401).send({status:"Invalid key"})
 
-    return res.status(401).send({status:"Invalid key"})
+    next()
 }

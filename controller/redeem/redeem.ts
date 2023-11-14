@@ -5,6 +5,7 @@ import {FindUuidById} from "../../utils/user.utils";
 import {GetCoin, SubtractCoin} from "../../soap/service/coin.soap.service";
 import {AddExp} from "../../soap/service/level.soap.service";
 import {RedisConf} from "../../handler/conf/redis.conf";
+import Redis from "ioredis";
 
 export async function CreateRedeem(req: Request, res: Response){
     const prisma = new PrismaClient()
@@ -85,16 +86,26 @@ export async function DeleteRedeem(req: Request, res: Response){
 export async function FindAllRedeem(req: Request, res: Response){
     const prisma = new PrismaClient()
     const redis = RedisConf()
-    await redis.connect
+    await redis.connect()
     let data: object = []
 
     try{
-        data = await redis.get("redeem")
-        if (!data){
-            data = await prisma.redeem.findMany({})
-            await redis.set('redeem', data)
-            await redis.expire('redeem', 24*60*60)
-        }
+        const _temp = await redis.get("redeem")
+        data = JSON.parse(_temp)
+    }catch (e) {
+        console.log('redeem not found in redis')
+    }
+
+    if (!(data==null))
+        return res.status(200).send({
+            data: data,
+            status: "ok"
+        })
+
+    try{
+        data = await prisma.redeem.findMany({})
+        await redis.set('redeem', JSON.stringify(data))
+        await redis.expire('redeem', 24*60*60)
 
         if (!data)
             return res.status(400).send({
@@ -106,8 +117,6 @@ export async function FindAllRedeem(req: Request, res: Response){
             data: null,
             status: "Internal server error"
         })
-    }finally {
-        await prisma.$disconnect()
     }
 
     return res.status(200).send({
