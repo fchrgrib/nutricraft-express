@@ -18,7 +18,7 @@ export async function CreateFile(req:Request, res:Response){
                 name:originalname,
                 type:mimetype.split("/")[1],
                 size: size,
-                url: `http://nutricraft-express/image?filename=${filename}`,
+                url: `http://localhost:8080/image?filename=${filename}`,
                 path: _path.join(__dirname, `../../../${path}`)
             }
         })
@@ -96,7 +96,7 @@ export async function UpdateFile(req: Request, res: Response){
                 name:originalname,
                 type:mimetype.split("/")[1],
                 size: size,
-                url: `http://nutricraft-express/image?filename=${filename}`,
+                url: `http://localhost:8080/image?filename=${filename}`,
                 path: _path.join(__dirname, `../../../${path}`)
             }
         })
