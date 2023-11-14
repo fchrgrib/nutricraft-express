@@ -4,6 +4,7 @@ import {FindIdByAccessToken} from "../../utils/jwt.utils";
 import {FindUuidById} from "../../utils/user.utils";
 import {GetCoin, SubtractCoin} from "../../soap/service/coin.soap.service";
 import {AddExp} from "../../soap/service/level.soap.service";
+import {RedisConf} from "../../handler/conf/redis.conf";
 
 export async function CreateRedeem(req: Request, res: Response){
     const prisma = new PrismaClient()
@@ -83,10 +84,18 @@ export async function DeleteRedeem(req: Request, res: Response){
 
 export async function FindAllRedeem(req: Request, res: Response){
     const prisma = new PrismaClient()
+    const redis = RedisConf()
+    await redis.connect
     let data: object = []
 
     try{
-        data = await prisma.redeem.findMany({})
+        data = await redis.get("redeem")
+        if (!data){
+            data = await prisma.redeem.findMany({})
+            await redis.set('redeem', data)
+            await redis.expire('redeem', 24*60*60)
+        }
+
         if (!data)
             return res.status(400).send({
                 data: null,
