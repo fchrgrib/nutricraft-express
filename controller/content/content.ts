@@ -101,7 +101,9 @@ export async function FindAllContent(req:Request, res:Response) {
 
     try{
         data = await prisma.content.findMany({
-            select:{}
+            include:{
+                viewers: true
+            }
         })
     }catch (e) {
         return res.status(500).send({
@@ -151,8 +153,7 @@ export async function FindContentById(req:Request, res:Response){
         data = await prisma.content.findMany({
             where:{
                 id: id
-            },
-            select:{}
+            }
         })
         await prisma.viewers.create({
             data:{
@@ -171,7 +172,7 @@ export async function FindContentById(req:Request, res:Response){
 
     return res.status(500).send({
         data:data,
-        status:"Internal server error"
+        status:"ok"
     })
 }
 
