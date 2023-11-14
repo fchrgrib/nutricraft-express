@@ -82,7 +82,10 @@ export async function FindAllForum(req:Request, res:Response){
 
     try {
         data = await prisma.forum.findMany({
-            select:{},
+            include:{
+                like: true,
+                comment: true
+            },
             orderBy:{
                 created_at:'asc'
             }
@@ -105,7 +108,10 @@ export async function FindForumById(req:Request, res:Response){
             where:{
                 id:id
             },
-            select:{},
+            include:{
+                like: true,
+                comment: true
+            },
             orderBy:{
                 created_at:'asc'
             }

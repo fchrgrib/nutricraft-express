@@ -190,7 +190,9 @@ export async function FindContentByUuid(req:Request, res:Response){
             where:{
                 id_creator: id
             },
-            select:{},
+            include:{
+                viewers:true
+            },
         })
     }catch (e) {
         return res.status(500).send({
@@ -227,7 +229,9 @@ export async function FindContentByCreator(req: Request, res: Response){
             where:{
                 id_creator: id
             },
-            select:{},
+            include:{
+                viewers:true
+            },
         })
     }catch (e) {
         return res.status(500).send({
@@ -266,6 +270,9 @@ export async function FindContentByTitle(req: Request, res: Response){
         const isContentExist = await prisma.content.findMany({
             where:{
                 title: title
+            },
+            include:{
+                viewers: true
             }
         })
         if (!isContentExist)

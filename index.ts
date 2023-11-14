@@ -1,5 +1,6 @@
 import express, { Express} from 'express'
 import dotenv from 'dotenv'
+import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import MainRouter from "./router/router"
 
@@ -10,6 +11,7 @@ const bodyParser = require("body-parser")
 app.use(express.json())
 app.use(bodyParser())
 app.use(cookieParser())
+app.use(cors())
 app.use(express.static('image'))
 dotenv.config()
 MainRouter(app)

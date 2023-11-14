@@ -50,7 +50,7 @@ export default async function Register(req: Request, res: Response) {
                 password: await bcrypt.hash(req.body.password, 10),
                 phone_number: req.body.phone_number,
                 description: req.body.description,
-                id_file: req.body.id_file
+                id_file: 1
             }
         })
     } catch (e) {
