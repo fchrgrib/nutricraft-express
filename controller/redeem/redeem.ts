@@ -1,6 +1,9 @@
 import {Request, Response} from "express"
 import {PrismaClient} from "@prisma/client";
 import {FindIdByAccessToken} from "../../utils/jwt.utils";
+import {FindUuidById} from "../../utils/user.utils";
+import {GetCoin, SubtractCoin} from "../../soap/service/coin.soap.service";
+import {AddExp} from "../../soap/service/level.soap.service";
 
 export async function CreateRedeem(req: Request, res: Response){
     const prisma = new PrismaClient()
@@ -118,6 +121,33 @@ export async function AddRedeem(req: Request, res: Response){
         return res.status(400).send({status: "You didn't fill request body"})
 
     try {
+        const isRedeemExists = await prisma.redeem.findFirst({
+            where:{
+                id:redeem_id
+            }
+        })
+        if (!isRedeemExists)
+            return res.status(400).send({status:"Id redeem didn't exists"})
+
+        const uuid = await FindUuidById(idUser)
+        if (uuid == null)
+            return res.status(400).send({status:"Id didn't exists"})
+
+        const coinUser = await GetCoin(uuid)
+        if (coinUser == null)
+            return res.status(400).send({status:"Uuid didn't exists"})
+
+        if (isRedeemExists.coin>parseInt(coinUser))
+            return res.status(400).send({status:"Transaction failed: coin not enough"})
+
+        const isSubtractSuccess = await SubtractCoin(uuid, isRedeemExists.coin)
+        if (!isSubtractSuccess)
+            return res.status(400).send({status:"Transaction failed: coin failed to subtract"})
+
+        const addExp = await AddExp(uuid,100)
+        if (!addExp)
+            return res.status(400).send({status:"Exp failed to add"})
+
         await prisma.userRedeem.create({
             data:{
                 redeem_id:redeem_id,
