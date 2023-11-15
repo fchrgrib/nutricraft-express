@@ -269,7 +269,9 @@ export async function FindContentByTitle(req: Request, res: Response){
     try{
         const isContentExist = await prisma.content.findMany({
             where:{
-                title: title
+                title: {
+                    contains: title
+                }
             },
             include:{
                 viewers: true
