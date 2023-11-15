@@ -1,5 +1,6 @@
 import {Request, Response} from "express"
 import {PrismaClient} from "@prisma/client";
+import bcrypt from "bcrypt";
 
 export async function FindUserById(req: Request, res: Response){
     const prisma = new PrismaClient()
@@ -103,4 +104,61 @@ export async function FindUserByUuid(req: Request, res: Response){
         data: data,
         status: 'ok'
     })
+}
+
+export async function UpdateUser(req: Request, res: Response){
+    const prisma = new PrismaClient()
+    const id = +req.params['id']
+
+    if (req.body == null)
+        return res.status(400).send({status: "Request body didn't exists"})
+
+    const {name, email, password, title, phone_number,  description} = req.body
+
+    if (!(
+        name && email && password &&
+        title && phone_number && description
+    ))
+        return res.status(400).send({status: "You didn't completed your request"})
+
+    try{
+        await prisma.user.update({
+            where:{
+                id: id
+            },
+            data:{
+                name: name,
+                email: email,
+                password: await bcrypt.hash(password, 10),
+                title: title,
+                phone_number: phone_number,
+                description: description,
+            }
+        })
+    }catch (e) {
+        return res.status(500).send({status: "Internal server error"})
+    }finally {
+        await prisma.$disconnect()
+    }
+
+    return res.status(200).send({status:"ok"})
+}
+
+export async function DeleteUser(req: Request, res: Response){
+    const prisma = new PrismaClient()
+    const id = +req.params['id']
+
+    try {
+        await prisma.user.delete({
+            where:{
+                id:id
+            }
+        })
+    }catch (e){
+        return res.status(400).send({status:"Internal server error"})
+    }finally {
+        await prisma.$disconnect()
+    }
+
+    return res.status(200).send({status:"ok"})
 }
