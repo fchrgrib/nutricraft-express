@@ -7,13 +7,14 @@ import {
     FindContentById, FindContentByTitle,
     UpdateContent, FindContentByCreator, FindContentBySubscriber
 } from "../../controller/content/content";
+import UserAccess from "../../handler/middleware/user.access";
 
 
 export default function ContentRouter(router: Express){
-    router.get('/content', Middleware, FindAllContent)
+    router.get('/content', UserAccess, FindAllContent)
     router.get('/content/:id', FindContentById)
     router.get('/content/creator/:uuid', FindContentByUuid)
-    router.get('/content/creator', Middleware, FindContentByCreator)
+    router.get('/content/creator', UserAccess, FindContentByCreator)
     router.post('/content/title', FindContentByTitle)
     router.post('/content/title/subscriber', FindContentBySubscriber)
     router.post('/content', Middleware, CreateContent)
