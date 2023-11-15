@@ -298,3 +298,57 @@ export async function FindContentByTitle(req: Request, res: Response){
         status: 'ok'
     })
 }
+
+export async function FindContentBySubscriber(req: Request, res: Response){
+    const prisma = new PrismaClient()
+    let data = []
+
+    if (req.body == null)
+        return res.status(400).send({
+            data: null,
+            status: "Request body didn't exists"
+        })
+
+    const {subscribes, title} = req.body
+    if (!(subscribes && title))
+        return res.status(400).send({
+            data: null,
+            status: "You didn't fill anything"
+        })
+
+    try{
+        for (const subscribe of subscribes) {
+            const idUser = await FindIdByUuid(subscribe)
+            if (idUser == null)
+                continue
+
+            const isContentExists = await prisma.content.findMany({
+                where:{
+                    id_creator: idUser,
+                    title:{
+                        contains: title
+                    }
+                }
+            })
+
+            if (!isContentExists)
+                continue
+
+            for (const content of isContentExists){
+                data.push(content)
+            }
+        }
+    }catch (e) {
+        return res.status(500).send({
+            data: null,
+            status: "Internal server error"
+        })
+    }finally {
+        await prisma.$disconnect()
+    }
+
+    return res.status(200).send({
+        data: data,
+        status: "ok"
+    })
+}
