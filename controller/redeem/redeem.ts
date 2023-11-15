@@ -5,7 +5,6 @@ import {FindUuidById} from "../../utils/user.utils";
 import {GetCoin, SubtractCoin} from "../../soap/service/coin.soap.service";
 import {AddExp} from "../../soap/service/level.soap.service";
 import {RedisConf} from "../../handler/conf/redis.conf";
-import Redis from "ioredis";
 
 export async function CreateRedeem(req: Request, res: Response){
     const prisma = new PrismaClient()

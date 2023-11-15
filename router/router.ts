@@ -5,6 +5,7 @@ import ForumRouter from "./forum/forum.router";
 import LikeForumRouter from "./forum/like.forum.router";
 import RedeemRouter from "./redeem/redeem.router";
 import {FileRouter} from "./file/file.router";
+import UserRouter from "./user/user.router";
 
 export default function MainRouter(router: Express) {
     router.use((req,res,next)=>{
@@ -26,4 +27,5 @@ export default function MainRouter(router: Express) {
     LikeForumRouter(router)
     RedeemRouter(router)
     FileRouter(router)
+    UserRouter(router)
 }
