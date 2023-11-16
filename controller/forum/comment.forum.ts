@@ -2,7 +2,8 @@ import {Request, Response} from "express"
 import {FindIdByAccessToken} from "../../utils/jwt.utils";
 import {PrismaClient} from "@prisma/client";
 
-export async function CreateComment(req:Request, res:Response){
+export async function
+CreateComment(req:Request, res:Response){
     const prisma = new PrismaClient()
     const idUser = await FindIdByAccessToken(req,res)
     if (idUser == null)
@@ -11,16 +12,17 @@ export async function CreateComment(req:Request, res:Response){
     if (req.body == null)
         return res.status(400).send({status:"Request body didnt exists"})
 
-    const {comment, id} = req.body
+    const {comment, id_forum, id_creator} = req.body
 
-    if (!(comment && id))
+    if (!(comment && id_forum && id_creator))
         return res.status(400).send({status:"comment didnt exist"})
 
     try{
         await prisma.comment.create({
             data:{
-                id:id,
+                id_forum:id_forum,
                 id_user:idUser,
+                id_creator: id_creator,
                 comment:comment
             }
         })
@@ -60,7 +62,7 @@ export async function UpdateComment(req:Request, res:Response){
     return res.status(200).send({status:"successfully updated comment"})
 }
 
-//TODO: make sure that delete and update is user
+
 export async function DeleteComment(req:Request, res:Response){
     const prisma = new PrismaClient()
     if (req.body == null)

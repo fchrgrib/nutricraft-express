@@ -6,6 +6,7 @@ import LikeForumRouter from "./forum/like.forum.router";
 import RedeemRouter from "./redeem/redeem.router";
 import {FileRouter} from "./file/file.router";
 import UserRouter from "./user/user.router";
+import CommentForumRouter from "./forum/comment.forum.router";
 
 export default function MainRouter(router: Express) {
     router.use((req,res,next)=>{
@@ -13,18 +14,19 @@ export default function MainRouter(router: Express) {
         next();
     })
 
-    router.use((req,res, next) => {
-        res.header('Access-Control-Allow-Credentials', 'true');
-        res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,UPDATE,OPTIONS');
-        res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
-        next();
-    });
+    // router.use((req,res, next) => {
+    //     res.header('Access-Control-Allow-Credentials', 'true');
+    //     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,UPDATE,OPTIONS');
+    //     res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+    //     next();
+    // });
 
     AuthRouter(router)
     ContentRouter(router)
     ForumRouter(router)
     ContentRouter(router)
     LikeForumRouter(router)
+    CommentForumRouter(router)
     RedeemRouter(router)
     FileRouter(router)
     UserRouter(router)

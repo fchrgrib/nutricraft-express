@@ -36,7 +36,13 @@ export default async function Middleware(req: Request, res: Response, next: Next
 
         const isUserExist = await prisma.user.findFirst({where:{uuid: decodeRefresh.uuid}})
         if (!isUserExist) return res.status(401).send({status:'refreshToken is invalid'})
-        res.cookie('token',jwt.sign(decode,`${process.env.JWT_KEY}${process.env.REFRESH_KEY}`||''),{maxAge:24*60*60})
+        res.cookie('token',jwt.sign(decode,`${process.env.JWT_KEY}${process.env.REFRESH_KEY}`||''),{
+            maxAge:24*60*60*1000,
+            secure: true,
+            httpOnly: false,
+            path: '/',
+            domain:'localhost'
+        })
     }catch (e) {
         return res.status(401).send({status:'refreshToken is invalid'})
     }finally {

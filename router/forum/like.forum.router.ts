@@ -1,7 +1,6 @@
 import {Express} from "express";
 import Middleware from "../../handler/middleware/middleware";
 import {CreateLike, DeleteLike} from "../../controller/forum/like.forum";
-import {DeleteForum} from "../../controller/forum/forum";
 
 export default function LikeForumRouter(router:Express){
     router.use('/like', Middleware)

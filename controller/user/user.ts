@@ -2,6 +2,47 @@ import {Request, Response} from "express"
 import {PrismaClient} from "@prisma/client";
 import bcrypt from "bcrypt";
 
+export async function FindAllUser(req: Request, res: Response){
+    const prisma = new PrismaClient()
+    let data: object = []
+
+    try {
+        data = await prisma.user.findMany({
+            select:{
+                    id: true,
+                    uuid: true,
+                    name: true,
+                    email: true,
+                    title: true,
+                    phone_number: true,
+                    description: true,
+                    id_file: true,
+                    created_at: true,
+                    updated_at: true,
+                    like_from_id_creator:true,
+                    forum: true
+            }
+        })
+        if (!data)
+            return res.status(400).send({
+                data: null,
+                status: "User didn't exists"
+            })
+    }catch (e) {
+        res.status(500).send({
+            data: null,
+            status: "Internal server error"
+        })
+    }finally {
+        await prisma.$disconnect()
+    }
+
+    return res.status(200).send({
+        data: data,
+        status: "ok"
+    })
+}
+
 export async function FindUserById(req: Request, res: Response){
     const prisma = new PrismaClient()
     const id = +req.params['id']
@@ -22,7 +63,9 @@ export async function FindUserById(req: Request, res: Response){
                 description: true,
                 id_file: true,
                 created_at: true,
-                updated_at: true
+                updated_at: true,
+                like_from_id_creator:true,
+                forum: true
             }
         })
 
@@ -80,7 +123,9 @@ export async function FindUserByUuid(req: Request, res: Response){
                 description: true,
                 id_file: true,
                 created_at: true,
-                updated_at: true
+                updated_at: true,
+                like_from_id_creator: true,
+                forum: true
             }
         })
 

@@ -11,22 +11,25 @@ datasource db {
 }
 
 model User {
-  id           Int          @id @default(autoincrement())
-  uuid         String       @unique @db.VarChar(255)
-  name         String       @db.VarChar(255)
-  email        String       @unique @db.VarChar(255)
-  password     String       @db.VarChar(255)
-  title        String       @db.VarChar(255)
-  phone_number String       @unique @db.VarChar(20)
-  description  String       @db.VarChar(1000)
-  id_file      Int
-  created_at   DateTime     @default(now())
-  updated_at   DateTime     @default(now())
-  file         File         @relation(fields: [id_file], references: [id])
-  content      Content[]
-  like         Like[]
-  comment      Comment[]
-  redeem       UserRedeem[]
+  id                      Int          @id @default(autoincrement())
+  uuid                    String       @unique @db.VarChar(255)
+  name                    String       @db.VarChar(255)
+  email                   String       @unique @db.VarChar(255)
+  password                String       @db.VarChar(255)
+  title                   String       @db.VarChar(255)
+  phone_number            String       @unique @db.VarChar(20)
+  description             String       @db.VarChar(1000)
+  id_file                 Int
+  created_at              DateTime     @default(now())
+  updated_at              DateTime     @default(now())
+  file                    File         @relation(fields: [id_file], references: [id])
+  content                 Content[]
+  redeem                  UserRedeem[]
+  forum                   Forum[]
+  like_from_id_user       Like[]       @relation("fk_id_user")
+  like_from_id_creator    Like[]       @relation("fk_id_creator")
+  comment_from_id_user    Comment[]    @relation("fk_id_creator_comment")
+  comment_from_id_creator Comment[]    @relation("fk_id_user_comment")
 }
 
 model Content {
@@ -55,26 +58,35 @@ model Forum {
   title      String    @db.VarChar(1000)
   body       String    @db.VarChar(10000)
   id_file    Int
+  id_creator Int
   like       Like[]
   comment    Comment[]
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
+  user       User      @relation(fields: [id_creator], references: [id])
 }
 
 model Like {
-  id      Int   @id
-  id_user Int
-  forum   Forum @relation(fields: [id], references: [id], onDelete: Cascade)
-  user    User  @relation(fields: [id_user], references: [id])
+  id         Int
+  id_creator Int
+  id_user    Int
+  forum      Forum @relation(fields: [id], references: [id], onDelete: Cascade)
+  user       User  @relation("fk_id_user", fields: [id_user], references: [id])
+  creator    User  @relation("fk_id_creator", fields: [id_creator], references: [id])
+
+  @@id([id, id_user])
 }
 
 model Comment {
-  id         Int      @id
+  id         Int      @id @default(autoincrement())
+  id_forum   Int
   id_user    Int
+  id_creator Int
   comment    String   @db.VarChar(10000)
   created_at DateTime @default(now())
-  user       User     @relation(fields: [id_user], references: [id], onDelete: Cascade)
-  forum      Forum    @relation(fields: [id], references: [id])
+  user       User     @relation("fk_id_user_comment", fields: [id_user], references: [id])
+  creator    User     @relation("fk_id_creator_comment", fields: [id_creator], references: [id])
+  forum      Forum    @relation(fields: [id_forum], references: [id])
 }
 
 model File {

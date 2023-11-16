@@ -1,8 +1,14 @@
 import {Request, Response} from "express"
 import {PrismaClient} from "@prisma/client";
+import {FindIdByAccessToken} from "../../utils/jwt.utils";
 
 export async function CreateForum(req:Request, res:Response) {
     const prisma = new PrismaClient()
+    const idCreator = await FindIdByAccessToken(req, res)
+
+    if (idCreator == null)
+        return res.status(400).send({status:"token invalid"})
+
     if (req.body == null)
         return res.status(400).send({status:"Request body didnt exists"})
 
@@ -15,7 +21,8 @@ export async function CreateForum(req:Request, res:Response) {
             data:{
                 title: title,
                 body: body,
-                id_file: id_file
+                id_file: id_file,
+                id_creator:idCreator
             }
         })
     }catch (e) {
@@ -87,7 +94,7 @@ export async function FindAllForum(req:Request, res:Response){
                 comment: true
             },
             orderBy:{
-                created_at:'asc'
+                created_at:'desc'
             }
         })
     }catch (e) {
