@@ -7,14 +7,15 @@ import {FindIdByUuid} from "../../utils/user.utils";
 
 export async function CreateFile(req:Request, res:Response){
     const prisma = new PrismaClient()
+    let id: null|number = null
 
     if (req.file == null)
-        return res.status(400).send({status:"Request body didn't exists"})
+        return res.status(400).send({id:null,status:"Request body didn't exists"})
 
     const {originalname, size, mimetype,path,filename} = req.file
 
     try {
-        await prisma.file.create({
+        const data = await prisma.file.create({
             data:{
                 name:originalname,
                 type:mimetype.split("/")[1],
@@ -23,13 +24,15 @@ export async function CreateFile(req:Request, res:Response){
                 path: _path.join(__dirname, `../../../${path}`)
             }
         })
+
+        id = data.id
     }catch (e) {
-        return res.status(500).send({status:"Internal server error"})
+        return res.status(500).send({id:null, status:"Internal server error"})
     }finally {
         await prisma.$disconnect()
     }
 
-    return res.status(200).send({status:"ok"})
+    return res.status(200).send({id: id,status:"ok"})
 }
 
 export async function DeleteFile(req: Request, res: Response){
