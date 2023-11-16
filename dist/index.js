@@ -15,7 +15,7 @@ const bodyParser = require("body-parser");
 app.use(express_1.default.json());
 app.use(bodyParser());
 app.use((0, cookie_parser_1.default)());
-app.use((0, cors_1.default)({ credentials: true, origin: ['http://localhost:3000', 'http://nutricraft-spa'], methods: ['GET', 'POST', 'PUT', 'DELETE'], }));
+app.use((0, cors_1.default)({ credentials: true, origin: ['http://localhost:3000', 'http://nutricraft-spa', 'http://192.168.0.12:3000', 'http://172.18.0.1:3000'], methods: ['GET', 'POST', 'PUT', 'DELETE'], }));
 app.use(express_1.default.static('image'));
 dotenv_1.default.config();
 (0, router_1.default)(app);

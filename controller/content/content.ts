@@ -103,6 +103,9 @@ export async function FindAllContent(req:Request, res:Response) {
         data = await prisma.content.findMany({
             include:{
                 viewers: true
+            },
+            orderBy:{
+                created_at:'desc'
             }
         })
     }catch (e) {
@@ -170,7 +173,7 @@ export async function FindContentById(req:Request, res:Response){
         await prisma.$disconnect()
     }
 
-    return res.status(500).send({
+    return res.status(200).send({
         data:data,
         status:"ok"
     })
@@ -203,9 +206,9 @@ export async function FindContentByUuid(req:Request, res:Response){
         await prisma.$disconnect()
     }
 
-    return res.status(500).send({
+    return res.status(200).send({
         data:data,
-        status:"Internal server error"
+        status:"ok"
     })
 }
 
@@ -242,9 +245,9 @@ export async function FindContentByCreator(req: Request, res: Response){
         await prisma.$disconnect()
     }
 
-    return res.status(500).send({
+    return res.status(200).send({
         data:data,
-        status:"Internal server error"
+        status:"ok"
     })
 }
 
