@@ -58,12 +58,13 @@ export async function DeleteContent(req:Request, res:Response){
 export async function UpdateContent(req:Request, res:Response) {
     const prisma = new PrismaClient()
     const id = +req.params['id']
+    const id_creator = await FindIdByAccessToken(req, res)
 
     if (req.body == null)
         return res.status(400).send({status:"Request body didnt exists"})
-    const {title, highlight, body, id_photo, id_creator} = req.body
+    const {title, highlight, body, id_photo} = req.body
 
-    if (!(id && title && highlight && body && id_photo))
+    if (!(id && title && highlight && body && id_photo && id_creator))
         return res.status(400).send({status: "you're not fill all the section"})
 
     try {

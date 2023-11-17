@@ -8,6 +8,6 @@ export default function ForumRouter(router:Express){
     router.get('/forum', FindAllForum)
     router.post('/forum', CreateForum)
     router.delete('/forum/:id', DeleteForum)
-    router.put('/forum', UpdateForum)
+    router.put('/forum/:id', UpdateForum)
     router.get('/forum/:id', FindForumById)
 }

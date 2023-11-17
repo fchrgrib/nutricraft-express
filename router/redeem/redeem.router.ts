@@ -6,7 +6,7 @@ import Middleware from "../../handler/middleware/middleware";
 export default function RedeemRouter(router: Express){
     router.post('/redeem', RedeemAccess, CreateRedeem)
     router.put('/redeem', RedeemAccess, UpdateRedeem)
-    router.delete('/redeem', RedeemAccess, DeleteRedeem)
+    router.delete('/redeem/:id', RedeemAccess, DeleteRedeem)
     router.get('/redeem', Middleware, FindAllRedeem)
     router.post('/redeem/user', Middleware, AddRedeem)
 }
