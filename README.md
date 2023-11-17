@@ -4,7 +4,7 @@
 nutricraft express merupakan sebuah API yang digunakan pada Nutricraft SOAP dan Nutricraft SPA, API ini sangat berguna dalam keberjalannya kedua service tersebut seperti melakukan request data data yang dibutuhkan, mengubah data, menghapus, ataupun mengupdate.
 
 ## Skema Basis Data
-![](storage\screenshoot\basisdata.jpg)
+![basisdata.jpg](storage%2Fscreenshoot%2Fbasisdata.jpg)
 
 ## Endpoint
 
