@@ -104,7 +104,7 @@ export async function FindAllRedeem(req: Request, res: Response){
     try{
         data = await prisma.redeem.findMany({})
         await redis.set('redeem', JSON.stringify(data))
-        await redis.expire('redeem', 24*60*60)
+        await redis.expire('redeem', 10*60)
 
         if (!data)
             return res.status(400).send({

@@ -42,14 +42,7 @@ export async function CreateContent(req: Request, res: Response){
 
 export async function DeleteContent(req:Request, res:Response){
     const prisma = new PrismaClient()
-
-    if (req.body == null)
-        return res.status(400).send({status:"Request body didnt exists"})
-
-    const {id} = req.body
-
-    if (!id)
-        return res.status(400).send({status:"Id didnt exists"})
+    const id = +req.params['id']
 
     try {
         await prisma.content.delete({where:{id:id}})
@@ -302,7 +295,7 @@ export async function FindContentByTitle(req: Request, res: Response){
     })
 }
 
-export async function FindContentBySubscriber(req: Request, res: Response){
+export async function FindContentByTitleAndSubscriber(req: Request, res: Response){
     const prisma = new PrismaClient()
     let data = []
 
@@ -354,4 +347,9 @@ export async function FindContentBySubscriber(req: Request, res: Response){
         data: data,
         status: "ok"
     })
+}
+
+export async function FindContentBySubscriber(req: Request, res: Response){
+    const prisma = new PrismaClient()
+
 }

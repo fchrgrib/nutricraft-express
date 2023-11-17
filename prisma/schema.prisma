@@ -50,7 +50,7 @@ model Viewers {
   id         Int     @id @default(autoincrement())
   id_content Int
   ip_address String  @db.VarChar(225)
-  content    Content @relation(fields: [id_content], references: [id])
+  content    Content @relation(fields: [id_content], references: [id], onDelete: Cascade)
 }
 
 model Forum {

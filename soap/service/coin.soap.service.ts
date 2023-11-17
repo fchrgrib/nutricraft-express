@@ -17,6 +17,7 @@ export async function GetCoin(uuid: string){
 
         const {body} = response
         parseString(body, async (err: any, result: any) =>{
+            console.log(result["S:Envelope"]["S:Body"][0]["ns2:getCoinsResponse"][0])
             coin = result["S:Envelope"]["S:Body"][0]["ns2:getCoinsResponse"][0]["return"][0]
         })
 

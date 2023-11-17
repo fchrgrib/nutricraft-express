@@ -6,7 +6,7 @@ const soap = require('easy-soap-request')
 
 export async function GetExp(uuid: string){
     const xmlRequest = util.format(getExp.template, uuid)
-    let exp: object = []
+    let exp =''
 
     try{
         const {response} = await soap({
@@ -19,7 +19,7 @@ export async function GetExp(uuid: string){
         parseString(body, async (err: any, result: any)=>{
             exp = result["S:Envelope"]["S:Body"][0]["ns2:getExpCreatorResponse"][0]["return"][0]
         })
-        return exp
+        return parseInt(exp)
     }catch (e) {
         return null
     }
